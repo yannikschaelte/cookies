@@ -9,7 +9,7 @@ Call:
 >>> python approve_vacation_uni_bonn.py --in=request.pdf
 
 Requirements:
->>> pip install pypdf reportlab click PIL
+>>> pip install pypdf reportlab click pillow
 
 Customize to your needs.
 """

@@ -9,7 +9,7 @@ Call:
 >>> python request_vacation_uni_bonn.py --date_from=01.08.2023 --date_to=30.09.2023
 
 Requirements:
->>> pip install pypdf reportlab click PIL
+>>> pip install pypdf reportlab click pillow
 
 Customize to your needs.
 """
