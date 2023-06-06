@@ -1,12 +1,12 @@
 """
-Approve vacation at the University of Bonn
+Request vacation at the University of Bonn
 ==========================================
 
-A small script to automatize the filling out of vacation approval
+A small script to automatize the filling out of vacation request
 standard forms at the University of Bonn.
 
 Call:
->>> python approve_vacation_uni_bonn.py --in=request.pdf
+>>> python request_vacation_uni_bonn.py --date_from=01.08.2023 --date_to=30.09.2023
 
 Requirements:
 >>> pip install pypdf reportlab click PIL
@@ -28,15 +28,33 @@ def date2str(date):
 
 
 @click.command()
-@click.option("-i", "--in", "input_pdf", type=str, help="Input PDF file", required=True)
+@click.option(
+    "-i",
+    "--in",
+    "input_pdf",
+    type=str,
+    help="Input PDF file",
+    default="request_vacation.pdf",
+)
 @click.option(
     "-o", "--out", "output_pdf", type=str, help="Output PDF file", default=None
 )
 @click.option(
-    "-n", "--name", "name", type=str, help="Signer's name", default="Yannik Schaelte"
+    "-n", "--name", "name", type=str, help="Requester's name", default="Yannik Schaelte"
 )
 @click.option(
     "-d", "--date", "date", type=str, help="Date in format %Y%m%d", default=None
+)
+@click.option(
+    "-f",
+    "--from",
+    "date_from",
+    type=str,
+    help="Date from in format %Y%m%d",
+    required=True,
+)
+@click.option(
+    "-t", "--to", "date_to", type=str, help="Date to in format %Y%m%d", required=True
 )
 @click.option(
     "-s",
@@ -56,20 +74,25 @@ def date2str(date):
     show_default=True,
     default=False,
 )
-def approve(
+def request(
     input_pdf,
     output_pdf,
     name,
     date,
+    date_from,
+    date_to,
     signature,
     overwrite,
 ):
+    # default date is today
     if date is None:
         date = datetime.now().strftime("%Y%m%d")
-    if output_pdf is None:
-        initials = "".join([w[0].lower() for w in name.split()])
-        output_pdf = f"{input_pdf[:-4]}_{initials}.pdf"
 
+    # output file name
+    if output_pdf is None:
+        output_pdf = f"request_vacation_{name.strip()}_{date_from}.pdf"
+
+    # check if output file exists
     if os.path.exists(output_pdf) and not overwrite:
         raise OSError(f"File exists: {output_pdf}")
 
@@ -82,20 +105,24 @@ def approve(
         c = canvas.Canvas(output_pdf, pagesize=A4)
         c.setFont("Helvetica", 12)
 
-        # Draw approval
-        c.drawString(59.5, 185, "x")
+        # Draw name
+        c.drawString(70, 777, name)
 
         # Draw date
-        c.drawString(95, 71, date2str(date))
+        c.drawString(435, 709, date2str(date))
 
-        # Draw name
-        c.drawString(330, 60, name)
+        # Draw request x
+        request_y = 564
+        c.drawString(158.5, request_y - 1, "x")
+        # Draw date from and to
+        c.drawString(280, request_y, date2str(date_from))
+        c.drawString(380, request_y, date2str(date_to))
 
         # Draw signature
         sgn = Image.open(signature)
         sgn_width = 90
         sgn_height = sgn_width * sgn.size[1] / sgn.size[0]
-        c.drawImage(signature, 330, 70, width=sgn_width, height=sgn_height)
+        c.drawImage(signature, 70, 257, width=sgn_width, height=sgn_height)
 
         # Add the original PDF content
         c.showPage()
@@ -114,20 +141,23 @@ def approve(
 
 
 # Usage example
-# input_pdf = 'request_vacation.pdf'
+# input_pdf = "request_vacation.pdf"
 # output_pdf = None
 # name = "Yannik Schaelte"
 # date = None
-# signature = 'signature.png'
+# date_from = "09.06.2023"
+# date_to = "09.06.2023"
+# signature = "signature.png"
 
-# approve(
+# request(
 #    input_pdf,
 #    output_pdf,
 #    name,
 #    date,
+#    date_from,
+#    date_to,
 #    signature,
 # )
 
-
 if __name__ == "__main__":
-    approve()
+    request()
