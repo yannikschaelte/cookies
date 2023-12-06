@@ -1,3 +1,4 @@
+# install all dependencies and build miniplaner
 set -eux
 
 mkdir miniplaner
